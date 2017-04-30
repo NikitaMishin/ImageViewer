@@ -16,9 +16,7 @@ import javax.swing.JFrame
 class ImageViewerCanvas(private var bufferedImage: BufferedImage) : Canvas() {
     override fun paint(g: Graphics) {
         super.paint(g)
-        for (i in 0..bufferedImage.height - 1)
-            for (j in 0..bufferedImage.width - 1)
-                g.drawImage(bufferedImage, i, j, this)
+        g.drawImage(bufferedImage, 0, 0, this)
     }
 }
 
