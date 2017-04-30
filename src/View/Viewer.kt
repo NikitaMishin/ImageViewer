@@ -1,7 +1,5 @@
 package View
 
-import Controller.Controller
-
 import java.awt.Canvas
 import java.awt.Graphics
 import java.awt.image.BufferedImage
@@ -45,7 +43,7 @@ class BmpViewer() : Viewer, Canvas() {
         frame.setSize(bufferedImage.width, bufferedImage.height)
         frame.add(ImageViewerCanvas(bufferedImage))
         frame.isVisible = true
-    }//not good input data!!
+    }
 
 }
 

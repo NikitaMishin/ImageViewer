@@ -4,6 +4,8 @@ package Controller
 
 import  Model.BmpModel24
 import  Model.BmpModel8
+import Model.BmpModel32
+import Model.BmpModel16
 import View.BmpViewer
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -12,16 +14,6 @@ import java.nio.file.Path;
 /**
  * Created by nikita on 24.04.17.
  */
-
-/**
- * parse file
- *
- */
-
-//class BitMapInfo {
-//    var Header: HashMap<String, Long> = hashMapOf()
-//    var PixelData: MutableList<Byte> = mutableListOf()
-//}
 
 interface Controller {
     fun validateFormat(): Boolean
@@ -34,23 +26,30 @@ class BmpController(var path: String, val ImageViewer: BmpViewer) : Controller {
         val path: Path = Paths.get(path)
         val rawData = Files.readAllBytes(path).toMutableList()
         when (Model.convertBytesToLong(rawData, 28, 30).toInt()) {
-            8 -> {
+            24 -> {
                 val model = BmpModel24(rawData)
                 model.registerDrawer(ImageViewer)
                 model.pushEvent()
             }
-            25 -> {
+            8 -> {
                 val model = BmpModel8(rawData)
                 model.registerDrawer(ImageViewer)
                 model.pushEvent()
             }
-            32 -> TODO()
-            16 -> TODO()
+            32 -> {
+                val model = BmpModel32(rawData)
+                model.registerDrawer(ImageViewer)
+                model.pushEvent()
+            }
+            16 -> {
+                val model = BmpModel16(rawData)
+                model.registerDrawer(ImageViewer)
+                model.pushEvent()
+            }
         }
     }
 
     override fun validateFormat(): Boolean = path.substring(path.lastIndex - 3, path.lastIndex + 1) == ".bmp"//specific! throw own exception
-
 }
 
 class GifController(var path: String) : Controller {
