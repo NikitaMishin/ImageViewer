@@ -25,6 +25,7 @@ class BmpController(var path: String, val ImageViewer: BmpViewer) : Controller {
     override fun parseFile() {
         val path: Path = Paths.get(path)
         val rawData = Files.readAllBytes(path).toMutableList()
+        println(Model.convertBytesToLong(rawData, 28, 30).toInt())
         when (Model.convertBytesToLong(rawData, 28, 30).toInt()) {
             24 -> {
                 val model = BmpModel24(rawData)
@@ -35,6 +36,8 @@ class BmpController(var path: String, val ImageViewer: BmpViewer) : Controller {
                 val model = BmpModel8(rawData)
                 model.registerDrawer(ImageViewer)
                 model.pushEvent()
+                println("hi")
+                println(Model.convertBytesToLong(rawData, 18, 22))
             }
             32 -> {
                 val model = BmpModel32(rawData)
@@ -46,6 +49,9 @@ class BmpController(var path: String, val ImageViewer: BmpViewer) : Controller {
                 model.registerDrawer(ImageViewer)
                 model.pushEvent()
             }
+            4-> TODO()
+            2-> TODO()
+            1-> TODO()
         }
     }
 

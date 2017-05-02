@@ -11,7 +11,7 @@ import kotlin.collections.HashMap
  */
 
 
-class PixelColor(){
+class PixelColor() {
 
 
 }
@@ -23,6 +23,7 @@ interface Model {
 }
 
 class ImageInfo(tableData: HashMap<String, Long>, ColorTable: MutableList<Byte>) {
+    //maybe make hash map without class
     var fileSize: Long = tableData["fileSize"]!!
     var offsetPixelBits: Long = tableData["offsetPixelBits"]!!
     //remember about sizeof of headers
@@ -32,45 +33,14 @@ class ImageInfo(tableData: HashMap<String, Long>, ColorTable: MutableList<Byte>)
     var version: Long? = tableData["version"]
     var height: Long? = tableData["height"]!!
     var width: Long? = tableData["width"]!!
-    var compression: Long? = tableData["fileSize"]!!
+    var compression: Long? = tableData["compression"]!!
     var ColorTable: MutableList<Byte> = ColorTable
 }
 
-
-class BmpModel16(rawData: MutableList<Byte>) : Model {
-    override fun removeDrawer(drawer: Viewer) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun registerDrawer(drawer: Viewer) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun pushEvent() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
-
-class BmpModel32(rawData: MutableList<Byte>) : Model {
-    override fun registerDrawer(drawer: Viewer) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun pushEvent() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun removeDrawer(drawer: Viewer) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
-
-class BmpModel8(rawData: MutableList<Byte>) : Model {
+abstract class BmpModel(rawData: MutableList<Byte>) {
     var imageInfo: ImageInfo
     var image: BufferedImage? = null
     var pixelData: MutableList<Byte>
-
-    private var drawers = mutableListOf<Viewer>()
 
     init {
         if (!(rawData[0].toChar() == 'B' && rawData[1].toChar() == 'M')) print("error")
@@ -79,7 +49,10 @@ class BmpModel8(rawData: MutableList<Byte>) : Model {
         tableData.put("offsetPixelBits", convertBytesToLong(rawData, 10, 14))
         tableData.put("version", convertBytesToLong(rawData, 14, 18))
         tableData.put("width", convertBytesToLong(rawData, 18, 22))
-        tableData.put("height", convertBytesToLong(rawData, 22, 26))
+        tableData.put("height", convertBytesToLong(rawData, 22, 26))//could be with - -> order of rews
+        println("version" + tableData["version"])
+        println("height" + tableData["height"])
+        println("width" + tableData["width"])
         tableData.put("bitCount", convertBytesToLong(rawData, 28, 30))
         tableData.put("compression", convertBytesToLong(rawData, 30, 34))
         tableData.put("colorUsed", convertBytesToLong(rawData, 46, 50))//other if need
@@ -94,14 +67,55 @@ class BmpModel8(rawData: MutableList<Byte>) : Model {
             124 -> 138
             else -> throw UnsupportedClassVersionError("Something wrong with image")
         }
-        var ColorTable = rawData.slice(startWith..tableData["colorUsed"]!!.toInt() * 4 + startWith - 1).toMutableList()
+        var ColorTable: MutableList<Byte>
+        when (tableData["colorUsed"]!!.toInt()) {
+            0 -> ColorTable = rawData.slice(startWith..Math.pow(2.0, tableData["bitCount"]!!.toDouble()).toInt() * 4 + startWith - 1).toMutableList()
+            else -> ColorTable = rawData.slice(startWith..tableData["colorUsed"]!!.toInt() * 4 + startWith - 1).toMutableList()
+        }
+        println(ColorTable.size)
+
         imageInfo = ImageInfo(tableData, ColorTable)
+
         pixelData = rawData.subList(imageInfo.offsetPixelBits.toInt(), rawData.size)
-        print(imageInfo.ColorTable.size)
+    }
+}
+
+
+class BmpModel16(rawData: MutableList<Byte>) : Model, BmpModel(rawData) {
+    override fun removeDrawer(drawer: Viewer) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun registerDrawer(drawer: Viewer) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun pushEvent() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+}
+
+class BmpModel32(rawData: MutableList<Byte>) : Model, BmpModel(rawData) {
+    override fun registerDrawer(drawer: Viewer) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun pushEvent() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun removeDrawer(drawer: Viewer) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+}
+
+class BmpModel8(rawData: MutableList<Byte>) : Model, BmpModel(rawData) {
+
+    private var drawers = mutableListOf<Viewer>()
+    override fun pushEvent() {
         convertToImage()
+        println(image!!.height)
+        println(image!!.width)
         for (drawer in drawers) drawer.handleEvent(image!!)
     }
 
@@ -118,54 +132,32 @@ class BmpModel8(rawData: MutableList<Byte>) : Model {
         var position: Int
         val height = imageInfo.height!!.toInt()
         val width = imageInfo.width!!.toInt()
-        image = BufferedImage(width, height, 1)//only rgb
-        for (i in height - 1 downTo 0)
-            for (j in 0..width - 1) {
-                position = convertBytesToLong(pixelData, (height - 1 - i) * width + j, (height - 1 - i) * width + j + 1).toInt()
+        val align = when ((width) % 4) {//real Width
+            3 -> width + 1
+            2 -> width + 2
+            1 -> width + 3
+            else -> width
+        }
+        println()
 
-                pixel = convertBytesToLong(imageInfo.ColorTable, position*4, position*4 + 4).toInt()//make mo understandable
+        image = BufferedImage(width, height, 1)//only rgb
+        println(align)
+        for (i in height - 1 downTo 0)//depends on version!!//
+            for (j in 0..width - 1) {
+
+                position = convertBytesToLong(pixelData, (height - 1 - i) * align + j, (height - 1 - i) * align + j + 1).toInt()
+                pixel = convertBytesToLong(imageInfo.ColorTable, position * 4, position * 4 + 4).toInt()//make mo understandable
                 image!!.setRGB(j, i, pixel)
             }
     }
 
 }
 
-class BmpModel24(rawData: MutableList<Byte>) : Model {
-    private var imageInfo: ImageInfo
-    private var image: BufferedImage? = null
-    private var pixelData: MutableList<Byte>
+class BmpModel24(rawData: MutableList<Byte>) : Model, BmpModel(rawData) {
     private var drawers = mutableListOf<Viewer>()
 
-    init {
-        if (!(rawData[0].toChar() == 'B' && rawData[1].toChar() == 'M')) print("error")
-
-        val tableData = HashMap<String, Long>()
-        tableData.put("fileSize", convertBytesToLong(rawData, 2, 6))
-        tableData.put("offsetPixelBits", convertBytesToLong(rawData, 10, 14))
-        tableData.put("version", convertBytesToLong(rawData, 14, 18))
-        tableData.put("width", convertBytesToLong(rawData, 18, 22))
-        tableData.put("height", convertBytesToLong(rawData, 22, 26))
-        tableData.put("bitCount", convertBytesToLong(rawData, 28, 30))
-        tableData.put("compression", convertBytesToLong(rawData, 30, 34))
-        tableData.put("colorUsed", convertBytesToLong(rawData, 46, 50))//other if need
-        val startWith = when (tableData["version"]!!.toInt()) {//where start the color table
-            12 -> 26
-            40 -> when (tableData["compression"]!!.toInt()) {
-                3 -> 66
-                6 -> 70
-                else -> 54
-            }
-            108 -> 122
-            124 -> 138
-            else -> throw UnsupportedClassVersionError("Something wrong with image")
-        }
-        var ColorTable = rawData.slice(startWith..tableData["colorUsed"]!!.toInt() * 4 + startWith - 1).toMutableList()
-        println(ColorTable.size)
-        imageInfo = ImageInfo(tableData, ColorTable)// color table could be depends on colorUsed and ither
-        pixelData = rawData.subList(imageInfo.offsetPixelBits.toInt(), rawData.size)
-    }
-
     override fun pushEvent() {
+        convertToImage()
         for (drawer in drawers) drawer.handleEvent(image!!)
     }
 
@@ -179,30 +171,39 @@ class BmpModel24(rawData: MutableList<Byte>) : Model {
 
     fun convertToImage() {
         var pixel: Int
+        print(imageInfo.height)
         val height = imageInfo.height!!.toInt()
+
         val width = imageInfo.width!!.toInt()
-        image = BufferedImage(width, height, 3) //corresponds to 32 bit model argb pre
-        for (i in height - 1 downTo 0)
-            for (j in 0..width - 1) {//where 4 must be variable which
-                pixel = convertBytesToLong(pixelData, (height - 1 - i) * (4 * width) + 4 * j, (height - 1 - i) * (4 * width) + 4 * j + 4).toInt()
+        println()
+        println(imageInfo.width!!)//width 194
+        var real: Int = width + 1
+        image = BufferedImage(width, height, 1)
+        for (i in height - 1 downTo 0) {
+
+            for (j in 0..width - 1) {//where 4 must be variable which,alignment
+
+
+                pixel = convertBytesToLong(pixelData, (height - 1 - i) * (3 * real) + 3 * j, (height - 1 - i) * (3 * real) + 3 * j + 3).toInt()
                 image!!.setRGB(j, i, pixel)
+
             }
+            println(i)
+        }
     }
+
 }
 
 
 fun convertBytesToLong(array: MutableList<Byte>, startWith: Int, endWith: Int): Long {
-    var value: Long = 0
-    if (startWith + 1 == endWith) {
-        value = array[startWith].toLong()
-        if (value<0) return value+256 else return value
-    }
+    var value = 0L
     var tmp: Long
     for (i in endWith - 1 downTo startWith) {
         tmp = array[i].toLong()
-        if (tmp < 0) tmp + 256
+        if (tmp < 0) tmp += 256
         value = value shl 8
-        value += tmp
+        value = value + tmp
+
     }
     return value
 }
@@ -211,3 +212,5 @@ fun convertBytesToLong(array: MutableList<Byte>, startWith: Int, endWith: Int): 
 //32-битная структура RGBQUAD. Применяется если в BITMAPINFO использована информационная структура версии 3, 4 или 5. В самой же структуре RGBQUAD указывается цвет в модели RGB в четырёх байтовых ячейках (все имеют WinAPI-тип BYTE): rgbBlue (синий), rgbGreen (зелёный), rgbRed (красный) и rgbReserved (зарезервирована и должна быть обнулена).
 
 //16-битные индексы цветов (беззнаковые целые числа) в текущей логической палитре контекста устройства (системные объекты Windows GDI). Этот вид доступен только во время выполнения приложения. Формат BMP не поддерживает явное указание, что используется такая таблица и поэтому приложение само извещает WinAPI-функции об этом в специальных параметрах (как правило константой DIB_PAL_COLORS).
+//make normal color table
+//      make cases

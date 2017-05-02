@@ -21,15 +21,25 @@ fun main(args: Array<String>) {
 // have \
     var bmpViewer = BmpViewer()
     var gifViewer = GifViewer()
-
+    var path: String = "exit"
     var Images: MutableList<Model.Model>
 
-    var path = "smp"
-//    print(petux[1].toChar())
-    var example = BmpController("/home/nikita/Desktop/lena512.bmp", bmpViewer)
-    if (!example.validateFormat()) print("df")
-    example.parseFile()
-   // example.
+   link@ do {
+       println("nema")
+        path = readLine()!!
+        when (path.substring(path.lastIndex - 3, path.lastIndex + 1)) {
+            ".bmp" -> {
+                BmpController(path, bmpViewer).parseFile()//
+
+            }
+            "exit" -> break@link
+        }
+
+    } while (true)
+    //var example = BmpController("/home/nikita/Desktop/lena512.bmp", bmpViewer)
+    //if (!example.validateFormat()) print("df")
+    //example.parseFile()
+    // example.
 
 
 }
