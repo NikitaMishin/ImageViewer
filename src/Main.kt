@@ -24,6 +24,13 @@ fun main(args: Array<String>) {
     var path: String = "exit"
     var Images: MutableList<Model.Model>
 
+    /*
+    possible commands
+    open filename
+    close
+     */
+
+
    link@ do {
        println("nema")
         path = readLine()!!
@@ -36,10 +43,4 @@ fun main(args: Array<String>) {
         }
 
     } while (true)
-    //var example = BmpController("/home/nikita/Desktop/lena512.bmp", bmpViewer)
-    //if (!example.validateFormat()) print("df")
-    //example.parseFile()
-    // example.
-
-
 }

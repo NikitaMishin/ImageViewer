@@ -41,6 +41,7 @@ abstract class BmpModel(rawData: MutableList<Byte>) {
     var imageInfo: ImageInfo
     var image: BufferedImage? = null
     var pixelData: MutableList<Byte>
+    protected val startWith: Int
 
     init {
         if (!(rawData[0].toChar() == 'B' && rawData[1].toChar() == 'M')) print("error")
@@ -56,7 +57,7 @@ abstract class BmpModel(rawData: MutableList<Byte>) {
         tableData.put("bitCount", convertBytesToLong(rawData, 28, 30))
         tableData.put("compression", convertBytesToLong(rawData, 30, 34))
         tableData.put("colorUsed", convertBytesToLong(rawData, 46, 50))//other if need
-        val startWith = when (tableData["version"]!!.toInt()) {//where start the color table
+        this.startWith = when (tableData["version"]!!.toInt()) {//where start the color table
             12 -> 26
             40 -> when (tableData["compression"]!!.toInt()) {
                 3 -> 66
@@ -67,12 +68,8 @@ abstract class BmpModel(rawData: MutableList<Byte>) {
             124 -> 138
             else -> throw UnsupportedClassVersionError("Something wrong with image")
         }
-        var ColorTable: MutableList<Byte>
-        when (tableData["colorUsed"]!!.toInt()) {
-            0 -> ColorTable = rawData.slice(startWith..Math.pow(2.0, tableData["bitCount"]!!.toDouble()).toInt() * 4 + startWith - 1).toMutableList()
-            else -> ColorTable = rawData.slice(startWith..tableData["colorUsed"]!!.toInt() * 4 + startWith - 1).toMutableList()
-        }
-        println(ColorTable.size)
+        var ColorTable: MutableList<Byte> = mutableListOf()//put in init
+
 
         imageInfo = ImageInfo(tableData, ColorTable)
 
@@ -110,6 +107,12 @@ class BmpModel32(rawData: MutableList<Byte>) : Model, BmpModel(rawData) {
 }
 
 class BmpModel8(rawData: MutableList<Byte>) : Model, BmpModel(rawData) {
+    init {
+        when (imageInfo.colorUsed!!.toInt()) {
+            0 -> imageInfo.ColorTable = rawData.slice(startWith..Math.pow(2.0, imageInfo.colorUsed!!.toDouble()).toInt() * 4 + startWith - 1).toMutableList()
+            else -> imageInfo.ColorTable = rawData.slice(startWith..imageInfo.colorUsed!!.toInt() * 4 + startWith - 1).toMutableList()
+        }
+    }
 
     private var drawers = mutableListOf<Viewer>()
     override fun pushEvent() {
@@ -171,24 +174,21 @@ class BmpModel24(rawData: MutableList<Byte>) : Model, BmpModel(rawData) {
 
     fun convertToImage() {
         var pixel: Int
-        print(imageInfo.height)
         val height = imageInfo.height!!.toInt()
-
         val width = imageInfo.width!!.toInt()
-        println()
-        println(imageInfo.width!!)//width 194
-        var real: Int = width + 1
+        val align = when ((width) % 4) {//real Width
+            3 -> width + 1
+            2 -> width + 2
+            1 -> width + 3
+            else -> width
+        }
         image = BufferedImage(width, height, 1)
         for (i in height - 1 downTo 0) {
 
-            for (j in 0..width - 1) {//where 4 must be variable which,alignment
-
-
-                pixel = convertBytesToLong(pixelData, (height - 1 - i) * (3 * real) + 3 * j, (height - 1 - i) * (3 * real) + 3 * j + 3).toInt()
+            for (j in 0..width - 1) {
+                pixel = convertBytesToLong(pixelData, (height - 1 - i) * 3 * align + 3 * j, (height - 1 - i) * (3 * align) + 3 * j + 3).toInt()
                 image!!.setRGB(j, i, pixel)
-
             }
-            println(i)
         }
     }
 
