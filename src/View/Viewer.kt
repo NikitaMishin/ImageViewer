@@ -5,6 +5,8 @@ import java.awt.Graphics
 import java.awt.image.BufferedImage
 
 import javax.swing.JFrame
+import javax.swing.WindowConstants
+import kotlin.system.exitProcess
 
 
 /**
@@ -40,6 +42,7 @@ class BmpViewer() : Viewer, Canvas() {
 
     override fun drawImage(bufferedImage: BufferedImage) {
         val frame = JFrame()
+        frame.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
         frame.setSize(bufferedImage.width, bufferedImage.height)
         frame.add(ImageViewerCanvas(bufferedImage))
         frame.isVisible = true
