@@ -27,6 +27,9 @@ fun main(args: Array<String>) {
             ".bmp" -> {
                 BmpController(path, bmpViewer).parseFile()
             }
+            ".gif"->{
+                TODO()
+            }
         }
     } while (true)
 }

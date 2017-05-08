@@ -3,7 +3,6 @@ package Model
 import View.Viewer
 import sun.awt.image.ImageFormatException
 import java.awt.image.BufferedImage
-import java.util.*
 import kotlin.collections.HashMap
 
 
@@ -39,8 +38,12 @@ abstract class BmpModel(rawData: MutableList<Byte>) {
     protected val startWith: Int
 
     init {
-        if (!(rawData[0].toChar() == 'B' && rawData[1].toChar() == 'M')) throw (ImageFormatException("It's wrong format"))
+        try {
+            if (!(rawData[0].toChar() == 'B' && rawData[1].toChar() == 'M')) throw (ImageFormatException("It's wrong format"))
+        }
+        catch (e:ImageFormatException){
 
+        }
         val tableData = HashMap<String, Long>()
         tableData.put("fileSize", convertBytesToLong(rawData, 2, 6))
         tableData.put("offsetPixelBits", convertBytesToLong(rawData, 10, 14))
