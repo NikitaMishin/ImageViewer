@@ -13,8 +13,8 @@ import javax.imageio.ImageIO.*
 internal class ImageViewerTest {
     @Test
     fun image24bit() {
-        val name = "/home/nikita/bmp/beaut_24bit.bmp"
-        val file = File("/home/nikita/bmp/beaut_24bit.bmp")
+        val name = "./images/bmp/beaut_24bit.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel24(Files.readAllBytes(path).toMutableList())
@@ -29,8 +29,8 @@ internal class ImageViewerTest {
 
     @Test
     fun image24bit2() {
-        val name = "/home/nikita/bmp/dodj_24bit.bmp"
-        val file = File("/home/nikita/bmp/dodj_24bit.bmp")
+        val name = "./images/bmp/dodj_24bit.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel24(Files.readAllBytes(path).toMutableList())
@@ -44,8 +44,8 @@ internal class ImageViewerTest {
 
     @Test
     fun image24bit3() {
-        val name = "/home/nikita/bmp/per_24bit.bmp"
-        val file = File("/home/nikita/bmp/per_24bit.bmp")
+        val name = "./images/bmp/per_24bit.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel24(Files.readAllBytes(path).toMutableList())
@@ -59,8 +59,8 @@ internal class ImageViewerTest {
 
     @Test
     fun image24bit4() {
-        val name = "/home/nikita/bmp/haker_24bit.bmp"
-        val file = File("/home/nikita/bmp/haker_24bit.bmp")
+        val name = "./images/bmp/haker_24bit.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel24(Files.readAllBytes(path).toMutableList())
@@ -75,8 +75,8 @@ internal class ImageViewerTest {
 
     @Test
     fun image24bit5() {
-        val name = "/home/nikita/bmp/love_24bit.bmp"
-        val file = File("/home/nikita/bmp/love_24bit.bmp")
+        val name = "./images/bmp/love_24bit.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel24(Files.readAllBytes(path).toMutableList())
@@ -90,8 +90,8 @@ internal class ImageViewerTest {
 
     @Test
     fun image24bit6() {
-        val name = "/home/nikita/bmp/warrios_24bit.bmp"
-        val file = File("/home/nikita/bmp/warrios_24bit.bmp")
+        val name = "./images/bmp/warrios_24bit.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel24(Files.readAllBytes(path).toMutableList())
@@ -105,8 +105,8 @@ internal class ImageViewerTest {
 
     @Test
     fun image8bit1() {
-        val name = "/home/nikita/bmp/bogts_8bit.bmp"
-        val file = File("/home/nikita/bmp/bogts_8bit.bmp")
+        val name = "./images/bmp/bogts_8bit.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel8(Files.readAllBytes(path).toMutableList())
@@ -120,8 +120,8 @@ internal class ImageViewerTest {
 
     @Test
     fun image8bit2() {
-        val name = "/home/nikita/Desktop/bmp/man.bmp"
-        val file = File("/home/nikita/Desktop/bmp/man.bmp")
+        val name = "./images/bmp/man.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel8(Files.readAllBytes(path).toMutableList())
@@ -136,8 +136,8 @@ internal class ImageViewerTest {
 
     @Test
     fun image8bit3() {
-        val name = "/home/nikita/bmp/hm_8bit.bmp"
-        val file = File("/home/nikita/bmp/hm_8bit.bmp")
+        val name = "./images/bmp/hm_8bit.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel8(Files.readAllBytes(path).toMutableList())
@@ -152,8 +152,8 @@ internal class ImageViewerTest {
 
     @Test
     fun image8bit4() {
-        val name = "/home/nikita/bmp/freebsd2_8bit.bmp"
-        val file = File("/home/nikita/bmp/freebsd2_8bit.bmp")
+        val name = "./images/bmp/freebsd2_8bit.bmp"
+        val file = File(name)
         val test = read(file)
         val path: Path = Paths.get(name)
         var model = Model.BmpModel8(Files.readAllBytes(path).toMutableList())
