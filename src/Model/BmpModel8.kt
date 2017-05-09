@@ -15,22 +15,7 @@ class BmpModel8(rawData: MutableList<Byte>) : Model, BmpModel(rawData) {
         }
     }
 
-    private var drawers = mutableListOf<Viewer>()
-
-    override fun pushEvent() {
-        convertToImage()
-        for (drawer in drawers) drawer.handleEvent(image!!)
-    }
-
-    override fun registerDrawer(drawer: Viewer) {
-        drawers.add(drawer)
-    }
-
-    override fun removeDrawer(drawer: Viewer) {
-        drawers.remove(drawer)
-    }
-
-    fun convertToImage() {
+    override fun convertToImage() {
         var pixel: Int
         var position: Int
         val height = imageInfo.height!!.toInt()

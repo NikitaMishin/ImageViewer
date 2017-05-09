@@ -8,37 +8,18 @@ import java.awt.image.BufferedImage
  */
 
 
-class BmpModel24(rawData: MutableList<Byte>) : Model, BmpModel(rawData) {
+class BmpModel24(rawData: MutableList<Byte>) : BmpModel(rawData) {
     private var drawers = mutableListOf<Viewer>()
 
-    override fun pushEvent() {
-        convertToImage()
-        for (drawer in drawers) drawer.handleEvent(image!!)
-    }
-
-    override fun registerDrawer(drawer: Viewer) {
-        drawers.add(drawer)
-    }
-
-    override fun removeDrawer(drawer: Viewer) {
-        drawers.remove(drawer)
-    }
-
-    fun convertToImage() {
+    override fun convertToImage() {
         var pixel: Int
         val height = imageInfo.height!!.toInt()
         val width = imageInfo.width!!.toInt()
-        println(height.toString()+" "+width.toString())
-        val align = when ((width) % 4) {//real Width
-            3 -> 3*width + 1
-            2 -> 3*width + 2
-            1 -> 3*width + 3
-            else -> width
-        }
+        val rowSize = ((imageInfo.bitCount!!.toInt() * width + 31) / 32) * 4 //round low?
         image = BufferedImage(width, height, 1)//rgb
         for (i in height - 1 downTo 0) {
             for (j in 0..width - 1) {
-                pixel = convertBytesToLong(pixelData, (height - 1 - i) * align + 3 * j, (height - 1 - i) *  align + 3 * j + 3).toInt()
+                pixel = convertBytesToLong(pixelData, (height - 1 - i) * (rowSize) + 3 * j, (height - 1 - i) * (rowSize) + 3 * j + 3).toInt()
                 image!!.setRGB(j, i, pixel)
             }
         }

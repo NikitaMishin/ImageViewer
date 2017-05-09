@@ -31,18 +31,26 @@ class ImageInfo(tableData: HashMap<String, Long>, ColorTable: MutableList<Byte>)
     var ColorTable: MutableList<Byte> = ColorTable
 }
 
-abstract class BmpModel(rawData: MutableList<Byte>) {
-    var imageInfo: ImageInfo
-    var image: BufferedImage? = null
-    var pixelData: MutableList<Byte>
-    protected val startWith: Int
+abstract class BmpModel(rawData: MutableList<Byte>) : Model {
+
+    protected lateinit var imageInfo: ImageInfo
+    internal var image: BufferedImage? = null
+    protected lateinit var pixelData: MutableList<Byte>
+    protected var startWith: Int = 0
+    private var drawers = mutableListOf<Viewer>()
+    private var errorIndicator: Boolean = false
 
     init {
+        init(rawData)
+    }
+
+    private fun init(rawData: MutableList<Byte>) {
         try {
             if (!(rawData[0].toChar() == 'B' && rawData[1].toChar() == 'M')) throw (ImageFormatException("It's wrong format"))
-        }
-        catch (e:ImageFormatException){
-
+        } catch (e: ImageFormatException) {
+            errorIndicator = true
+            println("Wrong format")
+            return
         }
         val tableData = HashMap<String, Long>()
         tableData.put("fileSize", convertBytesToLong(rawData, 2, 6))
@@ -67,7 +75,28 @@ abstract class BmpModel(rawData: MutableList<Byte>) {
         var ColorTable: MutableList<Byte> = mutableListOf()//put in init
         imageInfo = ImageInfo(tableData, ColorTable)
         pixelData = rawData.subList(imageInfo.offsetPixelBits.toInt(), rawData.size)
+
     }
+
+    abstract fun convertToImage()
+
+    override fun pushEvent() {
+        if (errorIndicator) {
+            println("Sorry,wrong format of image")
+            return
+        }
+        convertToImage()
+        for (drawer in drawers) drawer.handleEvent(image!!)
+    }
+
+    override fun registerDrawer(drawer: Viewer) {
+        drawers.add(drawer)
+    }
+
+    override fun removeDrawer(drawer: Viewer) {
+        drawers.remove(drawer)
+    }
+
 }
 
 fun convertBytesToLong(array: MutableList<Byte>, startWith: Int, endWith: Int): Long {
@@ -78,7 +107,6 @@ fun convertBytesToLong(array: MutableList<Byte>, startWith: Int, endWith: Int): 
         if (tmp < 0) tmp += 256
         value = value shl 8
         value += tmp
-
     }
     return value
 }
